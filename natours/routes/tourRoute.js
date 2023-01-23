@@ -11,8 +11,12 @@ const {
   aggregationTours,
   toursByYear,
 } = require('../controllers/tourController');
+const reviewRouter = require('./reviewRoute');
 const { guard, restrictTo } = require('../controllers/authController');
+
 ///router.param('id', checkId);
+
+router.use('/:tourId/reviews', reviewRouter);
 router.route('/monthly-plan/:year').get(toursByYear);
 router.route('/top-5-tours').get(topFiveTours, getAllTours);
 router.route('/tour-stats').get(aggregationTours);

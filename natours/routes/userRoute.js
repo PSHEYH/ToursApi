@@ -7,12 +7,14 @@ const {
   resetPassword,
   guard,
   changePassword,
+  restrictTo,
 } = require('../controllers/authController');
 
 const {
   updateMyData,
-  deleteMe,
   getAllUsers,
+  deleteUser,
+  getUser,
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -23,8 +25,12 @@ router.route('/forgotPassword').post(forgotPassword);
 router.route('/resetPassword/:token').patch(resetPassword);
 router.route('/changePassword').patch(guard, changePassword);
 router.route('/changeMyData').patch(guard, updateMyData);
-router.route('/deleteMe').delete(guard, deleteMe);
+//router.route('/deleteMe').delete(guard, deleteMe);
 router.route('/logout').post(logout);
 router.route('/').get(getAllUsers);
+router
+  .route('/:id')
+  .delete(guard, restrictTo('admin'), deleteUser)
+  .get(getUser);
 
 module.exports = router;

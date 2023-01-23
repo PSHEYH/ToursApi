@@ -1,7 +1,6 @@
 const Tour = require('../models/tour');
-const APIFeatures = require('../utils/api.features');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/app.errors');
+const factory = require('./handlerFactory');
 
 exports.topFiveTours = async (req, res, next) => {
   req.query.fields = 'name,price,ratingAverage';
@@ -71,62 +70,8 @@ exports.toursByYear = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-
-  const tours = await features.query;
-
-  res.status(200).json({
-    status: 'success',
-    data: tours,
-  });
-});
-
-exports.getTourById = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: tour,
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-  res.status(200).json({
-    status: 'updated',
-    data: tour,
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-  res.status(204).json({
-    status: 'deleted',
-  });
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: tour,
-  });
-});
+exports.getAllTours = factory.getAll(Tour);
+exports.getTourById = factory.getOne(Tour, { path: 'reviews' });
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
+exports.createTour = factory.createOne(Tour);
