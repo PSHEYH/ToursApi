@@ -25,9 +25,10 @@ const tourSchema = mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      required: true,
       min: [1, 'Rating must be above 1'],
       max: [5, 'Rating must be below 5'],
+      default: 4.5,
+      set: (val) => Math.round(val * 10) / 10,
     },
     ratingQuantity: {
       type: Number,
@@ -64,7 +65,10 @@ const tourSchema = mongoose.Schema(
         default: 'Point',
         enum: ['Point'],
       },
-      coordinates: [Number],
+      coordinates: {
+        type: [Number],
+        default: [0, 0],
+      },
       description: String,
       address: String,
     },
@@ -93,6 +97,10 @@ const tourSchema = mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+tourSchema.index({ difficulty: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 //// Virtual properties (Computed fields)
 tourSchema.virtual('durationWeeks').get(function () {
@@ -135,10 +143,10 @@ tourSchema.post(/^find/, function (docs, next) {
   next();
 });
 
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTours: { $ne: true } } });
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift({ $match: { secretTours: { $ne: true } } });
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 

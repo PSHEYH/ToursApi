@@ -31,13 +31,11 @@ exports.updateMyData = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: 'success',
-    users: users,
-  });
-});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
+exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User);
 exports.deleteUser = factory.deleteOne(User);
